@@ -1,5 +1,6 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
+#include <libopencm3/stm32/timer.h>
 
 class Rcc {
 public:
@@ -12,15 +13,14 @@ public:
 int main() {
     rcc_periph_clock_enable(RCC_GPIOD);
     gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO15);
-
-    for (uint32_t ptime{0}; true; ++ptime) {
-        gpio_toggle(GPIOD, GPIO13);
-        if (ptime % 500'000 < 250'000)
-            gpio_set(GPIOD, GPIO15);
-        else
-            gpio_clear(GPIOD, GPIO15);
-        
-        
-        
+    rcc_periph_clock_enable(RCC_TIM6);
+    timer_set_prescaler(TIM6, 8000 - 1);
+    timer_set_period(TIM6, 1000 - 1);
+    timer_enable_counter(TIM6);
+    while (true){
+        if (timer_get_counter(TIM6) < 500) {gpio_set(GPIOD, GPIO15);}
+        else {gpio_clear(GPIOD, GPIO15);}
     }
+        
+    
 }
